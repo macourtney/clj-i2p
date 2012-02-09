@@ -12,8 +12,8 @@
 (defn request-map-from []
   { :destination (base-64-destination) })
 
-(defn create-request-map [destination action data]
-  { :destination destination :action action :data data :from (request-map-from) })
+(defn create-request-map [destination service data]
+  { :destination destination :service service :data data :from (request-map-from) })
 
 (defn- send-request [request-map]
   (try
@@ -22,8 +22,8 @@
       (logging/warn (str "Could not connect to destination: " (:destination request-map)))
       nil)))
 
-(defn send-message [destination action data]
-  (client-interceptors/run-interceptors send-request (create-request-map destination action data)))
+(defn send-message [destination service data]
+  (client-interceptors/run-interceptors send-request (create-request-map destination service data)))
 
-(defn send-messages [destinations action data call-back]
-  (doall (map #(future (call-back (send-message % action data))) destinations)))
+(defn send-messages [destinations service data call-back]
+  (doall (map #(future (call-back (send-message % service data))) destinations)))

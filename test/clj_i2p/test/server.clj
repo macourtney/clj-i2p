@@ -1,14 +1,32 @@
 (ns clj-i2p.test.server
   (:use [clj-i2p.server])
-  (:use [clojure.test]))
+  (:use [clojure.test])
+  (:require [clj-i2p.service :as service]
+            [clj-i2p.service-protocol :as service-protocol]))
 
-(def test-action-key :test-action)
 (def response-map { :data "blah" })
 
-(defn test-action [request-map]
-  response-map)
+(deftype TestService []
+  service-protocol/Service
+  (key [service]
+     :test-service)
 
-(deftest action-test
-  (add-action test-action-key test-action)
-  (is (find-action test-action-key))
-  (is (= (assoc response-map :action test-action-key) (run-action { :action test-action-key }))))
+  (name [service]
+    "Test Service")
+  
+  (version [service]
+    "1.0.0")
+
+  (description [service]
+    "This is a test service.")
+
+  (handle [service request-map]
+     response-map))
+
+(deftest service-test
+  (let [test-service (TestService.)
+        test-service-key (service-protocol/key test-service)]
+    (service/add-service test-service)
+  (is (service/find-service test-service-key))
+  (is (= (assoc response-map :service test-service-key) (run-service { :service test-service-key })))
+  (service/reset-services!)))
