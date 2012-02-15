@@ -1,6 +1,7 @@
 (ns clj-i2p.server
   (:require [clojure.tools.logging :as logging]
             [clj-i2p.core :as core]
+            [clj-i2p.list-service.protocol :as list-service-protocol]
             [clj-i2p.server-interceptors :as server-interceptors]
             [clj-i2p.service :as service]
             [clj-i2p.service-protocol :as service-protocol]))
@@ -67,4 +68,5 @@
   "Initializes the server by loading the client-handler into the i2p server handler."
   []
   (logging/info "Initializing server.")
+  (service/add-service (list-service-protocol/create-list-service))
   (core/init client-handler))
