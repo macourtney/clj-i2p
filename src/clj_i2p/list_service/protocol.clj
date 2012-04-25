@@ -9,7 +9,7 @@
 
   (name [service]
     "List Service")
-  
+
   (version [service]
     "1.0.0")
 
