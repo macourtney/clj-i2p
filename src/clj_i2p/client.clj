@@ -13,7 +13,7 @@
   { :destination (base-64-destination) })
 
 (defn create-request-map [destination service data]
-  { :destination destination :service service :data data :from (request-map-from) })
+  { :destination (core/as-destination destination) :service service :data data :from (request-map-from) })
 
 (defn- send-request [request-map]
   (try

@@ -33,7 +33,15 @@
 
   (add-peer-delete-listener [persister listener] "Registers a listener which will be notified when a peer is deleted from the system.")
 
-  (remove-peer-delete-listener [persister listener] "Unregisters a delete listener."))
+  (remove-peer-delete-listener [persister listener] "Unregisters a delete listener.")
+  
+  (default-destinations [persister] "Returns a list of all destinations which have not been loaded into the persister
+yet. This function is called when no destinations are in the persister which is likely the first time the application is
+run.")
+  
+  (peers-downloaded? [persister] "Returns true if the peers downloaded property is set to true which should be true after all peers known on the network have been downloaded from a peer.")
+  
+  (set-peers-downloaded? [persister value] "Sets the value of the peers downloaded property which should only be set to true when all peers known on the network have been downloaded."))
 
 (defn register [peer-persister]
   (swap! instance (fn [_] peer-persister)))

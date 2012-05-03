@@ -23,14 +23,22 @@
   (doseq [listener @peer-delete-listeners]
     (listener peer)))
 
+(defn next-id []
+  (inc (or (apply max (keys (peer-map))) 0)))
+
 (deftype MemoryPeerPersister []
   persister-protocol/PeerPersister
   (insert-peer [persister peer]
     (if-let [id (:id peer)]
       (do
         (update-peer-map #(assoc % id peer))
-        (notify-update-listeners (get (peer-map) id)))
-      (throw (new RuntimeException (str "Cannot insert a peer without an id: " peer)))))
+        (notify-update-listeners (get (peer-map) id))
+        id)
+      (let [id (next-id)
+            new-peer (assoc peer :id id)]
+        (update-peer-map #(assoc % id new-peer))
+        (notify-update-listeners (get (peer-map) id))
+        id)))
 
   (update-peer [persister peer]
     (if-let [id (:id peer)]
@@ -86,7 +94,10 @@
     (swap! peer-delete-listeners conj listener))
 
   (remove-peer-delete-listener [persister listener]
-    (swap! peer-delete-listeners disj listener)))
+    (swap! peer-delete-listeners disj listener))
+  
+  (default-destinations [persister]
+    ["default-destination"]))
 
 (defn create-memory-peer-persister []
   (MemoryPeerPersister.))
