@@ -2,11 +2,12 @@
   (:require [clojure.tools.logging :as logging]
             [clj-i2p.client :as client]
             [clj-i2p.core :as clj-i2p-core]
+            [clj-i2p.peer-service.peer :as peer-service]
             [clj-i2p.peer-service.peer-client :as peer-client]))
 
-(def notify-action :notify)
-
 (defn call [destination]
-  (let [response (peer-client/send-message destination
-                   { :action notify-action :destination (client/base-64-destination) })]
-      (= (:data response) "ok")))
+  (peer-service/notify-call destination))
+
+(defn action [request-map]
+  (peer-service/update-peer-destination (:destination (:data request-map)))
+  { :data "ok" })

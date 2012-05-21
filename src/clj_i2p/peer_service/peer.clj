@@ -1,11 +1,13 @@
 (ns clj-i2p.peer-service.peer
   (:require [clojure.tools.logging :as logging]
             [clj-i2p.peer-service.list-peers :as list-peers]
-            [clj-i2p.peer-service.notify :as notify]
+            [clj-i2p.peer-service.peer-client :as peer-client]
             [clj-i2p.peer-service.persister-protocol :as persister-protocol]
             [clj-i2p.client :as client]
             [clj-i2p.core :as clj-i2p-core])
   (:import [java.util Date]))
+
+(def notify-action :notify)
 
 (defn insert-peer
   "Saves the given peer."
@@ -134,8 +136,14 @@
     (when-let [peer-id (add-peer-destionation peer-destination)]
       (update-peer { :id peer-id :notified true }))))
 
+(defn notify-call [peer-destination]
+  (when peer-destination
+    (let [response (peer-client/send-message peer-destination
+                                             { :action notify-action :destination (client/base-64-destination) })]
+      (= (:data response) "ok"))))
+
 (defn notify-peer-destination [peer-destination]
-  (if (notify/call peer-destination)
+  (if (notify-call peer-destination)
     (update-peer (merge (find-by-peer-destination peer-destination) { :notified true :updated_at (new Date) }))
     (logging/info (str "Destination " peer-destination " is not online."))))
 

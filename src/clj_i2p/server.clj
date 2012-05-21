@@ -2,6 +2,7 @@
   (:require [clojure.tools.logging :as logging]
             [clj-i2p.core :as core]
             [clj-i2p.list-service.protocol :as list-service-protocol]
+            [clj-i2p.peer-service.protocol :as peer-service-protocol]
             [clj-i2p.server-interceptors :as server-interceptors]
             [clj-i2p.service :as service]
             [clj-i2p.service-protocol :as service-protocol]))
@@ -69,4 +70,5 @@
   []
   (logging/info "Initializing server.")
   (service/add-service (list-service-protocol/create-list-service))
+  (service/add-service (peer-service-protocol/create-list-service))
   (core/init client-handler))
