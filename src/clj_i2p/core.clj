@@ -1,13 +1,10 @@
 (ns clj-i2p.core
-  (:require [clj-i2p.database.util :as database-util]
-            [clojure.data.json :as json]
+  (:require [clojure.data.json :as json]
             [clojure.tools.cli :as cli]
             [clojure.tools.logging :as logging]
             [clojure.java.io :as java-io]
             [clojure.java.javadoc :as javadoc]
-            [clojure.string :as clj-string]
-            [config.environment :as environment]
-            [drift.runner :as drift-runner])
+            [clojure.string :as clj-string])
   (:import [java.io BufferedInputStream BufferedReader BufferedWriter ByteArrayInputStream File FileInputStream InputStreamReader OutputStreamWriter PrintWriter]
            [net.i2p.client.streaming I2PSocketManagerFactory]
            [net.i2p.data Destination PrivateKey PrivateKeyFile]
@@ -28,10 +25,6 @@
 (def private-key-file (File. private-key-directory-name private-key-file-name))
 
 (def timeout 600000)
-
-(def database-initialized? (atom false))
-
-(def environment-initialized? (atom false))
 
 (defn add-destination-listener [listener]
   (swap! destination-listeners conj listener))
@@ -156,31 +149,3 @@
           (write-json socket data)
           (read-json socket))
         (notify-send-message-fail destination-obj data)))))
-
-(defn parse-arguments
-  "Parses the given arguments. The only supported argument is --mode which sets the mode to development, production, or test."
-  [args]
-  (cli/cli args
-    ["-m" "--mode" "The server mode. For example, development, production, or test." :default nil]))
-
-(defn
-#^{ :doc "Sets the server mode to the given mode. The given mode must be a keyword or string like development, 
-production, or test." }
-  set-mode [mode]
-  (when mode 
-    (environment/set-evironment-property (name mode))))
-
-(defn get-mode [parsed-args]
-  (get parsed-args :mode))
-
-(defn database-init []
-  (when (compare-and-set! database-initialized? false true)
-    (environment/environment-init)
-    (database-util/init-database)
-    (drift-runner/update-to-version Long/MAX_VALUE)))
-
-(defn init-args [args]
-  (let [[args-map remaining help] (parse-arguments args)]
-    (set-mode (get-mode args-map))
-    (database-init)
-    [remaining help]))
