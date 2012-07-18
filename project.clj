@@ -6,7 +6,5 @@
                  [org.clojure/clojure "1.2.1"]
                  [org.clojure/data.json "0.1.1"]
                  [org.clojure/tools.cli "0.2.1"]
-                 [org.clojure/tools.logging "0.2.0"]
-                 [org.drift-db/drift-db-h2 "1.0.7"]]
-  :dev-dependencies [[drift "1.4.3"]
-                     [org.clojure/clojure "1.2.1"]])
+                 [org.clojure/tools.logging "0.2.0"]]
+  :dev-dependencies [[org.clojure/clojure "1.2.1"]])
