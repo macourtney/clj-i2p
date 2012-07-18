@@ -12,6 +12,8 @@
 
 (def manager (atom nil))
 
+(def mock-network (atom nil))
+
 (def destination (atom nil))
 
 (def destination-listeners (atom []))
@@ -141,11 +143,27 @@
 (defn destination-online? [destination]
   (and @manager destination (.ping @manager (as-destination destination) timeout)))
 
+(defn set-mock-network [mock-network-function]
+  (reset! mock-network mock-network-function))
+
+(defn clear-mock-network []
+  (reset! mock-network nil))
+
+(defn get-mock-network []
+  @mock-network)
+
+(defn send-mock-network-message [destination data]
+  (@mock-network destination data))
+
 (defn send-message [destination data]
-  (let [destination-obj (as-destination destination)]
-    (when @manager
-      (if (.ping @manager destination-obj timeout)
-        (let [socket (.connect @manager destination-obj)]
-          (write-json socket data)
-          (read-json socket))
-        (notify-send-message-fail destination-obj data)))))
+  (if @mock-network
+    (send-mock-network-message destination data)
+    (let [destination-obj (as-destination destination)]
+      (when @manager
+        (if (.ping @manager destination-obj timeout)
+          (let [socket (.connect @manager destination-obj)]
+            (write-json socket data)
+            (let [response (read-json socket)]
+              (.close socket)
+              response))
+          (notify-send-message-fail destination-obj data))))))
