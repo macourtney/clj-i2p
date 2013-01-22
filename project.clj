@@ -3,7 +3,6 @@
   :dependencies [[org.clojars.macourtney/i2p "0.9.4"]
                  [org.clojars.macourtney/mstreaming "0.9.4"]
                  [org.clojars.macourtney/streaming "0.9.4"]
-                 [org.clojure/clojure "1.4.0"]
                  [org.clojure/data.json "0.1.1"]
                  [org.clojure/tools.cli "0.2.1"]
                  [org.clojure/tools.logging "0.2.0"]])
