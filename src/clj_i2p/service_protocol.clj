@@ -1,4 +1,5 @@
-(ns clj-i2p.service-protocol)
+(ns clj-i2p.service-protocol
+  (:refer-clojure :exclude [key name]))
 
 (defprotocol Service
   "This protocol includes all functions necessary to add a service to the clj-i2p server. To add a service, implement

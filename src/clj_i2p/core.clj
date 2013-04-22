@@ -20,11 +20,9 @@
 
 (def send-message-fail-listeners (atom []))
 
-(def private-key-file-name "private_key.dat")
+(def private-key-file-name (atom "private_key.dat"))
 
-(def private-key-directory-name "data")
-
-(def private-key-file (File. private-key-directory-name private-key-file-name))
+(def private-key-directory (atom (File. "data")))
 
 (def timeout 600000)
 
@@ -50,12 +48,21 @@
 (defn is-current-destination-base-64? [destination]
   (= destination (base-64-destination)))
 
+(defn set-private-key-file-name [new-private-key-file-name]
+  (reset! private-key-file-name new-private-key-file-name))
+
+(defn set-private-key-file-directory [new-private-key-directory]
+  (reset! private-key-directory new-private-key-directory))
+
+(defn private-key-file []
+  (File. @private-key-directory @private-key-file-name))
+  
 (defn private-key-file-exists? []
-  (.exists private-key-file))
+  (.exists (private-key-file)))
 
 (defn load-private-key []
   (let [private-key (new PrivateKey)]
-    (with-open [key-file-input-stream (FileInputStream. private-key-file)
+    (with-open [key-file-input-stream (FileInputStream. (private-key-file))
                 key-buffer-input-stream (BufferedInputStream. key-file-input-stream)]
       (.readBytes private-key key-buffer-input-stream))
     private-key))
@@ -63,10 +70,10 @@
 (defn save-private-key []
   (when (not (private-key-file-exists?))
     (logging/debug (str "Creating and saving the private key."))
-    (PrivateKeyFile/main (into-array String (list (.getPath private-key-file))))))
+    (PrivateKeyFile/main (into-array String (list (.getPath (private-key-file)))))))
 
 (defn create-new-manager []
-  (I2PSocketManagerFactory/createManager (java-io/input-stream private-key-file)))
+  (I2PSocketManagerFactory/createManager (java-io/input-stream (private-key-file))))
 
 (defn create-manager []
   (save-private-key)
