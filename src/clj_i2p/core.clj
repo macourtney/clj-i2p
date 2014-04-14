@@ -10,6 +10,12 @@
            [net.i2p.data Destination PrivateKey PrivateKeyFile]
            [net.i2p.util I2PThread]))
 
+(def data-key :data)
+(def destination-key :destination)
+(def from-key :from)
+(def service-key :service)
+(def service-version-key :service-version)
+
 (def manager (atom nil))
 
 (def mock-network (atom nil))
@@ -69,20 +75,23 @@
 
 (defn save-private-key []
   (when (not (private-key-file-exists?))
-    (logging/debug (str "Creating and saving the private key."))
+    (logging/debug "Creating and saving the private key.")
     (PrivateKeyFile/main (into-array String (list (.getPath (private-key-file)))))))
 
 (defn create-new-manager []
-  (I2PSocketManagerFactory/createManager (java-io/input-stream (private-key-file))))
+  (when (private-key-file-exists?)
+    (I2PSocketManagerFactory/createManager (java-io/input-stream (private-key-file)))))
 
 (defn create-manager []
   (save-private-key)
   (create-new-manager))
 
 (defn load-manager []
-  (let [new-manager (create-manager)]
-    (reset! manager new-manager)
-    new-manager))
+  (if-let [old-manager @manager]
+    old-manager
+    (let [new-manager (create-manager)]
+      (reset! manager new-manager)
+      new-manager)))
 
 (defn get-server-socket [manager]
   (try
@@ -122,17 +131,22 @@
   (doseq [destination-listener @destination-listeners]
     (destination-listener (current-destination))))
 
-(defn start-server [client-handler]
+(defn load-manager-and-destination []
   (let [new-manager (load-manager)
         session (.getSession new-manager)]
     (set-destination (.getMyDestination session))
-    (start-client-handler client-handler)
     (notify-destination-listeners)))
+
+(defn start-server [client-handler]
+  (load-manager-and-destination)
+  (start-client-handler client-handler))
 
 (defn init [client-handler]
   (.start (Thread. #(start-server client-handler))))
 
-(defn as-destination [destination]
+(defn as-destination
+  "Tries to convert the given destination to a i2p Destination object."
+  [destination]
   (if (or (nil? destination) (instance? Destination destination))
     destination
     (Destination. (str destination))))

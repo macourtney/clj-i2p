@@ -21,5 +21,4 @@
       :list (list-service/list-services)
       { :error (str "Unknown action: " (:action request-map)) })))
 
-(defn create-list-service []
-  (ListService.))
+(def list-service (new ListService))

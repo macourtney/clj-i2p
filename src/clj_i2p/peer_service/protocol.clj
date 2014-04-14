@@ -1,14 +1,13 @@
 (ns clj-i2p.peer-service.protocol
-  (:require [clj-i2p.peer-service.list-peers :as list-peers]
-            [clj-i2p.peer-service.notify :as notify]
-            [clj-i2p.peer-service.peer :as peer-service]
-            [clj-i2p.peer-service.peer-client :as peer-client]
+  (:require [clj-i2p.peer-service.actions.list-peers :as list-peers-action]
+            [clj-i2p.peer-service.actions.notify :as notify-action]
             [clj-i2p.service-protocol :as service-protocol]))
 
-(deftype ListService []
+(def service-name :peer-service)
+
+(deftype PeerService []
   service-protocol/Service
-  (key [service]
-    peer-client/service-name)
+  (key [service] service-name)
 
   (name [service]
     "Peer Service")
@@ -21,9 +20,8 @@
 
   (handle [service request-map]
     (condp = (:action request-map)
-      peer-service/notify-action (notify/action request-map)
-      list-peers/list-peers-action (list-peers/action request-map)
+      notify-action/action-key (notify-action/action request-map)
+      list-peers-action/action-key (list-peers-action/action request-map)
       { :error (str "Unknown action: " (:action request-map)) })))
 
-(defn create-list-service []
-  (ListService.))
+(def peer-service (new PeerService))
