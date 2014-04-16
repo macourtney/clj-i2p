@@ -13,15 +13,15 @@
 (defn request-map-from []
   { core/destination-key (base-64-destination) })
 
-(defn create-request-map
+(defn update-request-map
   "Creates a request map for the given destination, calling the given service
 with the given data."
-  [destination service data]
-  { core/destination-key (core/as-destination destination)
-    core/service-key (service-protocol/key service)
-    core/service-version-key (service-protocol/version service)
-    core/data-key data
-    core/from-key (request-map-from) })
+  [destination service request-map]
+  (merge request-map
+    { core/destination-key (core/as-destination destination)
+      core/service-key (service-protocol/key service)
+      core/service-version-key (service-protocol/version service)
+      core/from-key (request-map-from) }))
 
 (defn- send-request [request-map]
   (try
@@ -34,7 +34,7 @@ with the given data."
 
 (defn send-message [destination service data]
   (client-interceptors/run-interceptors send-request
-    (create-request-map destination service data)))
+    (update-request-map destination service data)))
 
 (defn send-messages [destinations service data call-back]
   (doseq [destination destinations]

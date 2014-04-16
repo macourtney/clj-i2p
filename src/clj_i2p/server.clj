@@ -39,7 +39,7 @@ service-key and service-version."
   "Adds the service and service version from the given service to the
 response-map."
   [service response-map]
-  (merge (service-protocol/handle service response-map)
+  (merge response-map
     { core/service-key (keyword (service-protocol/key service))
       core/service-version-key (keyword (service-protocol/version service)) }))
 
@@ -70,8 +70,9 @@ function passes the socket to perform-service."
     (try
       (when-let [socket (.accept server-socket)]
         (perform-service socket))
-      (catch Throwable t
-        (logging/error "An error occured while handling a connection." t)))))
+      (catch Throwable throwable
+        (logging/error throwable
+          "An error occured while handling a connection.")))))
 
 (defn init
   "Initializes the server by loading the client-handler into the i2p server

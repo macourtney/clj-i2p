@@ -32,10 +32,12 @@
   (is (= (request-map-from) { :destination (base-64-destination) })))
 
 (deftest test-create-request-map
-  (is (= (create-request-map
-           test-to-destination test-util/test-service test-data)
+  (is (= (update-request-map
+           test-to-destination test-util/test-service
+           { core/data-key test-data })
          (assoc (test-request-map) core/destination-key test-to-destination))))
 
 (deftest test-send-message
-  (is (= (send-message test-to-destination test-util/test-service test-data)
+  (is (= (send-message test-to-destination test-util/test-service
+                       { core/data-key test-data })
          test-response)))
