@@ -69,6 +69,8 @@ function passes the socket to perform-service."
   (while true
     (try
       (when-let [socket (.accept server-socket)]
+        (logging/debug "Received connection from: "
+                       (core/as-destination-str (.getPeerDestination socket)))
         (perform-service socket))
       (catch Throwable throwable
         (logging/error throwable

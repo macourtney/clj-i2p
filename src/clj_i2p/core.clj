@@ -151,38 +151,67 @@
     destination
     (Destination. (str destination))))
 
-(defn as-destination-str [destination]
+(defn as-destination-str
+  "Converts the given i2p destination object into a string."
+  [destination]
   (if (instance? Destination destination)
     (.toBase64 destination)
     destination))
 
-(defn notify-send-message-fail [destination data]
+(defn notify-send-message-fail
+  "Called when send-message fails. Notifies any send-message-fail-listeners that
+a message has failed."
+  [destination data]
+  (logging/debug "Failed to send message to destination: "
+                 (as-destination-str destination))
   (let [destination-obj (as-destination destination)]
     (doseq [send-message-fail-listener @send-message-fail-listeners]
       (send-message-fail-listener destination data))))
 
-(defn destination-online? [destination]
-  (and @manager destination (.ping @manager (as-destination destination) timeout)))
+(defn destination-online?
+  "Returns true if a manager is installed and the given destination is online
+and pingable."
+  [destination]
+  (and @manager destination
+       (.ping @manager (as-destination destination) timeout)))
 
-(defn set-mock-network [mock-network-function]
+(defn set-mock-network
+  "Sets a mock network. A mock network is a function which takes a destination
+and data and returns a response. A mock network is useful when testing and you
+don't want to connect to the real i2p network."
+  [mock-network-function]
   (reset! mock-network mock-network-function))
 
-(defn clear-mock-network []
+(defn clear-mock-network
+  "Removes the mock network."
+  []
   (reset! mock-network nil))
 
-(defn get-mock-network []
+(defn get-mock-network
+  "Returns the mock network currently installed."
+  []
   @mock-network)
 
-(defn send-mock-network-message [destination data]
+(defn send-mock-network-message
+  "Sends the given data to the given destination on the mock network."
+  [destination data]
   (@mock-network destination data))
 
-(defn send-message [destination data]
-  (if @mock-network
+(defn send-message
+  "Sends the given data to the given destination. If a mock network is
+installed, then the data is sent to the mock network instead. Before the data is
+sent, the destination is pinged. If the ping fails, then the
+notify-send-message-fail function is called."
+  [destination data]
+  (if (and @mock-network destination)
     (send-mock-network-message destination data)
     (let [destination-obj (as-destination destination)]
       (when @manager
+        (logging/debug "Sending message to destination: "
+                       (as-destination-str destination))
         (if (.ping @manager destination-obj timeout)
           (let [socket (.connect @manager destination-obj)]
+            (logging/debug "Ping succeeded. Writing to socket.")
             (write-json socket data)
             (let [response (read-json socket)]
               (.close socket)
