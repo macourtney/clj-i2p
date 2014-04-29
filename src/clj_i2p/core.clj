@@ -211,7 +211,6 @@ notify-send-message-fail function is called."
                        (as-destination-str destination))
         (if (.ping @manager destination-obj timeout)
           (let [socket (.connect @manager destination-obj)]
-            (logging/debug "Ping succeeded. Writing to socket.")
             (write-json socket data)
             (let [response (read-json socket)]
               (.close socket)
