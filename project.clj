@@ -1,4 +1,4 @@
-(defproject clj-i2p "1.0.0"
+(defproject clj-i2p "1.0.1-SNAPSHOT"
   :description "Clj-i2p is a wrapper for an interface to the i2p p2p network."
   :dependencies [[org.clojars.macourtney/i2p "0.9.13-0"]
                  [org.clojars.macourtney/mstreaming "0.9.13-0"]
