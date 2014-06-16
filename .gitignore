@@ -11,4 +11,5 @@
 .classpath
 /.lein-deps-sum
 /bin
+/pom.xml.asc
 /target
